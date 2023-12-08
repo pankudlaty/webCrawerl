@@ -1,3 +1,4 @@
+const { JSDOM } = require('jsdom')
 function normalizeURL(rawURL) {
   const myURL = new URL(rawURL);
   let fullPath = `${myURL.hostname}${myURL.pathname}`
@@ -6,6 +7,26 @@ function normalizeURL(rawURL) {
   }
   return fullPath
 }
+function getURLsFromHTML(htmlBody, baseURL) {
+  let absoluteURLs = []
+  let listURLs = []
+  const dom = new JSDOM(htmlBody)
+  const relURLs = dom.window.document.querySelectorAll("a")
+  for (let i = 0; i < relURLs.length; i++) {
+    listURLs.push(relURLs[i].href);
+  }
+  for (let url in listURLs) {
+    if (listURLs[url].startsWith('http') || listURLs[url].startsWith('https')) {
+      absoluteURLs.push(listURLs[url])
+    } else if (!listURLs[url].startsWith('/')) {
+      continue
+    } else {
+      absoluteURLs.push(`${baseURL}${listURLs[url]}`)
+    }
+  }
+  return absoluteURLs
+}
 module.exports = {
-  normalizeURL
+  normalizeURL,
+  getURLsFromHTML
 }
