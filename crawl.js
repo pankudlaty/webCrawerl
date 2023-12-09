@@ -46,6 +46,30 @@ async function crawlPage(baseURL, currentURL, pages) {
   } else {
     pages[normalizedURL] = 1
   }
+  console.log(`crawling: ${currentURL}`)
+  let htmlBody = ''
+  try {
+    const response = await fetch(currentURL)
+    if (response.status > 399) {
+      console.log(`Http error: ${response.status}`)
+      return pages
+    }
+    const contentType = response.headers.get('content-type')
+    if (!contentType.includes('text/html')) {
+      console.log(`Not html response: ${contentType}`)
+      return pages
+    }
+    htmlBody = await response.text()
+  } catch (err) {
+    console.log(err.message)
+  }
+
+  const nextURLs = getURLsFromHTML(htmlBody, baseURL)
+  for (const nextURL of nextURLs) {
+    pages = await crawlPage(baseURL, nextURL, pages)
+  }
+
+  return pages
 }
 
 
