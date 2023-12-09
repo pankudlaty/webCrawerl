@@ -26,7 +26,33 @@ function getURLsFromHTML(htmlBody, baseURL) {
   }
   return absoluteURLs
 }
+
+async function crawlPage(baseURL, currentURL, pages) {
+  const currentUrlObj = new URL(currentURL)
+  const baseUrlObj = new URL(baseURL)
+  if (currentUrlObj.hostname !== baseUrlObj.hostname) {
+    return pages
+  }
+
+  const normalizedURL = normalizeURL(currentURL)
+
+  if (pages[normalizedURL] > 0) {
+    pages[normalizedURL]++
+    return pages
+  }
+
+  if (currentURL === baseURL) {
+    pages[normalizedURL] = 0
+  } else {
+    pages[normalizedURL] = 1
+  }
+}
+
+
+
+
 module.exports = {
   normalizeURL,
-  getURLsFromHTML
+  getURLsFromHTML,
+  crawlPage
 }
